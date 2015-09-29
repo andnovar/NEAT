@@ -190,7 +190,7 @@ bool xor_evaluate(Organism *org) {
   
   if (success) {
     errorsum=(fabs(out[0])+fabs(1.0-out[1])+fabs(1.0-out[2])+fabs(out[3])+fabs(1.0-out[4])+fabs(out[5])+fabs(out[6])+fabs(1.0-out[7]));
-	org->fitness=pow((8.0-errorsum),2);
+	org->fitness=pow((8.0-errorsum),3);
     org->error=errorsum;
   }
   else {
@@ -200,7 +200,7 @@ bool xor_evaluate(Organism *org) {
   }
 
   #ifndef NO_SCREEN_OUT
-  cout<<"Org "<<(org->gnome)->genome_id<<"                                     error: "<<errorsum<<"  ["<<out[0]<<" "<<out[1]<<" "<<out[2]<<" "<<out[3]<<"]"<<endl;
+  cout<<"Org "<<(org->gnome)->genome_id<<"                                     error: "<<errorsum<<"  ["<<out[0]<<" "<<out[1]<<" "<<out[2]<<" "<<out[3]<<" "<<out[4]<<" "<<out[5]<<" "<<out[6]<<" "<<out[7]<<"]"<<endl;
   cout<<"Org "<<(org->gnome)->genome_id<<"                                     fitness: "<<org->fitness<<endl;
   #endif
 
