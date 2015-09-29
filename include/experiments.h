@@ -39,7 +39,7 @@ using namespace NEAT;
 //The XOR evolution routines *****************************************
 Population *xor_test(int gens);
 bool xor_evaluate(Organism *org);
-int xor_epoch(Population *pop,int generation,char *filename, int &winnernum, int &winnergenes,int &winnernodes);
+int xor_epoch(Population *pop,int generation,char *filename, int &winnernum, int &winnergenes,int &winnernodes, double &max_fit_winner);
 
 //Single pole balancing evolution routines ***************************
 Population *pole1_test(int gens); 

@@ -31,19 +31,26 @@ Population *xor_test(int gens) {
     int evals[NEAT::num_runs];  //Hold records for each run
     int genes[NEAT::num_runs];
     int nodes[NEAT::num_runs];
+    double max_fitness_x_run[NEAT::num_runs];
+    double max_fitness[gens];
+    int winner_generation=0;
     int winnernum;
     int winnergenes;
     int winnernodes;
+    double max_fitness_x_gen;
     //For averaging
     int totalevals=0;
     int totalgenes=0;
     int totalnodes=0;
+    double total_max_fitness=0;
     int expcount;
     int samples;  //For averaging
 
     memset (evals, 0, NEAT::num_runs * sizeof(int));
     memset (genes, 0, NEAT::num_runs * sizeof(int));
     memset (nodes, 0, NEAT::num_runs * sizeof(int));
+    memset (max_fitness_x_run, 0, NEAT::num_runs * sizeof(int));
+    memset (max_fitness, 0, gens * sizeof(double));
 
     ifstream iFile("xorstartgenes",ios::in);
 
@@ -67,38 +74,51 @@ Population *xor_test(int gens) {
       pop->verify();
       
       for (gen=1;gen<=gens;gen++) {
-	cout<<"Epoch "<<gen<<endl;	
+		cout<<"Epoch "<<gen<<endl;
 
-	//This is how to make a custom filename
-	fnamebuf=new ostringstream();
-	(*fnamebuf)<<"gen_"<<gen<<ends;  //needs end marker
+		//This is how to make a custom filename
+		fnamebuf=new ostringstream();
+		(*fnamebuf)<<"gen_"<<gen<<ends;  //needs end marker
 
-	#ifndef NO_SCREEN_OUT
-	cout<<"name of fname: "<<fnamebuf->str()<<endl;
-	#endif
-
-	char temp[50];
-	sprintf (temp, "gen_%d", gen);
-
-	//Check for success
-	if (xor_epoch(pop,gen,temp,winnernum,winnergenes,winnernodes)) {
-	  //	if (xor_epoch(pop,gen,fnamebuf->str(),winnernum,winnergenes,winnernodes)) {
-	  //Collect Stats on end of experiment
-	  evals[expcount]=NEAT::pop_size*(gen-1)+winnernum;
-	  genes[expcount]=winnergenes;
-	  nodes[expcount]=winnernodes;
-	  gen=gens;
-
-	}
+		#ifndef NO_SCREEN_OUT
+		cout<<"name of fname: "<<fnamebuf->str()<<endl;
+		#endif
 	
-	//Clear output filename
-	fnamebuf->clear();
-	delete fnamebuf;
+		char temp[50];
+		sprintf (temp, "gen_%d", gen);
 	
+		//Check for success
+		bool success = xor_epoch(pop,gen,temp,winnernum,winnergenes,winnernodes, max_fitness_x_gen);
+		max_fitness[gen-1]=max_fitness_x_gen;
+		if (success) {
+		  //	if (xor_epoch(pop,gen,fnamebuf->str(),winnernum,winnergenes,winnernodes)) {
+		  //Collect Stats on end of experiment
+		  evals[expcount]=NEAT::pop_size*(gen-1)+winnernum;
+		  genes[expcount]=winnergenes;
+		  nodes[expcount]=winnernodes;
+		  winner_generation=gen;
+		  gen=gens;
+		}
+
+		//Clear output filename
+		fnamebuf->clear();
+		delete fnamebuf;
+
+	  }
+
+      int gencount;
+      if(winner_generation != 0){
+		  cout<<"Average max fitness over generations: " <<endl;
+		  for(gencount=0; gencount<winner_generation; gencount++){
+			total_max_fitness += max_fitness[gencount];
+			cout<<"Max fitness of generation "<< (gencount+1) << ": " << max_fitness[gencount]<<endl;
+		  }
+		  max_fitness_x_run[expcount] = (double)total_max_fitness/winner_generation;
+		  cout<<"Average Max Fitness over generations: "<< max_fitness_x_run[expcount] <<endl;
       }
 
-      if (expcount<NEAT::num_runs-1) delete pop;
-      
+	  if (expcount<NEAT::num_runs-1) delete pop;
+
     }
 
     //Average and print stats
@@ -120,8 +140,8 @@ Population *xor_test(int gens) {
       cout<<evals[expcount]<<endl;
       if (evals[expcount]>0)
       {
-	totalevals+=evals[expcount];
-	samples++;
+		totalevals+=evals[expcount];
+		samples++;
       }
     }
 
@@ -212,7 +232,7 @@ bool xor_evaluate(Organism *org) {
 
 }
 
-int xor_epoch(Population *pop,int generation,char *filename,int &winnernum,int &winnergenes,int &winnernodes) {
+int xor_epoch(Population *pop,int generation,char *filename,int &winnernum,int &winnergenes,int &winnernodes, double &max_fit_winner) {
   vector<Organism*>::iterator curorg;
   vector<Species*>::iterator curspecies;
   //char cfilename[100];
@@ -238,6 +258,7 @@ int xor_epoch(Population *pop,int generation,char *filename,int &winnernum,int &
     }
   }
   
+  double max_fit=0.0;
   //Average and max their fitnesses for dumping to file and snapshot
   for(curspecies=(pop->species).begin();curspecies!=(pop->species).end();++curspecies) {
 
@@ -247,8 +268,15 @@ int xor_epoch(Population *pop,int generation,char *filename,int &winnernum,int &
     //to observe fitnesses at
 
     (*curspecies)->compute_average_fitness();
-    (*curspecies)->compute_max_fitness();
+    double fitness = (*curspecies)->compute_max_fitness();
+    if(fitness > max_fit){
+    	max_fit = fitness;
+    }
+	cout<< "Max fitness for specie "<< (*curspecies)->id << "--> " << fitness <<endl;
   }
+  // Defining max_fitness of this generation from the max fitness of the specie.
+  max_fit_winner = max_fit;
+  cout<< "Max fitness winner "<< max_fit_winner << endl;
 
   //Take a snapshot of the population, so that it can be
   //visualized later on
@@ -326,28 +354,28 @@ Population *pole1_test(int gens) {
       pop->verify();
 
       for (gen=1;gen<=gens;gen++) {
-	cout<<"Generation "<<gen<<endl;
-	
-	fnamebuf=new ostringstream();
-	(*fnamebuf)<<"gen_"<<gen<<ends;  //needs end marker
+		cout<<"Generation "<<gen<<endl;
 
-#ifndef NO_SCREEN_OUT
-	cout<<"name of fname: "<<fnamebuf->str()<<endl;
-#endif	
-
-	char temp[50];
-        sprintf (temp, "gen_%d", gen);
-
-	status=pole1_epoch(pop,gen,temp);
-	//status=(pole1_epoch(pop,gen,fnamebuf->str()));
+		fnamebuf=new ostringstream();
+		(*fnamebuf)<<"gen_"<<gen<<ends;  //needs end marker
 	
-	if (status) {
-	  runs[expcount]=status;
-	  gen=gens+1;
-	}
+		#ifndef NO_SCREEN_OUT
+			cout<<"name of fname: "<<fnamebuf->str()<<endl;
+		#endif
 	
-	fnamebuf->clear();
-	delete fnamebuf;
+		char temp[50];
+			sprintf (temp, "gen_%d", gen);
+	
+		status=pole1_epoch(pop,gen,temp);
+		//status=(pole1_epoch(pop,gen,fnamebuf->str()));
+
+		if (status) {
+		  runs[expcount]=status;
+		  gen=gens+1;
+		}
+
+		fnamebuf->clear();
+		delete fnamebuf;
 	
       }
 
