@@ -107,6 +107,7 @@ Population *xor_test(int gens) {
 	  }
 
       int gencount;
+      total_max_fitness = 0;
       if(winner_generation != 0){
 		  cout<<"Average max fitness over generations: " <<endl;
 		  for(gencount=0; gencount<winner_generation; gencount++){
@@ -145,6 +146,9 @@ Population *xor_test(int gens) {
       }
     }
 
+    for(expcount=0;expcount<NEAT::num_runs;expcount++) {
+    	cout<<"Average Max Fitness over generations for: run "<<expcount<<" => "<< max_fitness_x_run[expcount] <<endl;
+    }
     cout<<"Failures: "<<(NEAT::num_runs-samples)<<" out of "<<NEAT::num_runs<<" runs"<<endl;
     cout<<"Average Nodes: "<<(samples>0 ? (double)totalnodes/samples : 0)<<endl;
     cout<<"Average Genes: "<<(samples>0 ? (double)totalgenes/samples : 0)<<endl;
