@@ -136,7 +136,7 @@ Population *xor_test(int gens) {
 
 bool xor_evaluate(Organism *org) {
   Network *net;
-  double out[4]; //The four outputs
+  double out[8]; //The four outputs
   double this_out; //The current output
   int count;
   double errorsum;
@@ -189,8 +189,8 @@ bool xor_evaluate(Organism *org) {
   }
   
   if (success) {
-    errorsum=(fabs(out[0])+fabs(1.0-out[1])+fabs(1.0-out[2])+fabs(out[3]));
-    org->fitness=pow((4.0-errorsum),2);
+    errorsum=(fabs(out[0])+fabs(1.0-out[1])+fabs(1.0-out[2])+fabs(out[3])+fabs(1.0-out[4])+fabs(out[5])+fabs(out[6])+fabs(1.0-out[7]));
+	org->fitness=pow((8.0-errorsum),2);
     org->error=errorsum;
   }
   else {
@@ -206,7 +206,7 @@ bool xor_evaluate(Organism *org) {
 
   //  if (errorsum<0.05) { 
   //if (errorsum<0.2) {
-  if ((out[0]<0.5)&&(out[1]>=0.5)&&(out[2]>=0.5)&&(out[3]<0.5)) {
+  if ((out[0]<0.5)&&(out[1]>=0.5)&&(out[2]>=0.5)&&(out[3]<0.5)&&(out[4]>=0.5)&&(out[5]<0.5)&&(out[6]<0.5)&&(out[7]>=0.5)) {
     org->winner=true;
     return true;
   }
