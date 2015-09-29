@@ -67,33 +67,33 @@ Population *xor_test(int gens) {
       pop->verify();
       
       for (gen=1;gen<=gens;gen++) {
-	cout<<"Epoch "<<gen<<endl;	
+		cout<<"Epoch "<<gen<<endl;
 
-	//This is how to make a custom filename
-	fnamebuf=new ostringstream();
-	(*fnamebuf)<<"gen_"<<gen<<ends;  //needs end marker
+		//This is how to make a custom filename
+		fnamebuf=new ostringstream();
+		(*fnamebuf)<<"gen_"<<gen<<ends;  //needs end marker
 
-	#ifndef NO_SCREEN_OUT
-	cout<<"name of fname: "<<fnamebuf->str()<<endl;
-	#endif
+		#ifndef NO_SCREEN_OUT
+		cout<<"name of fname: "<<fnamebuf->str()<<endl;
+		#endif
 
-	char temp[50];
-	sprintf (temp, "gen_%d", gen);
+		char temp[50];
+		sprintf (temp, "gen_%d", gen);
 
-	//Check for success
-	if (xor_epoch(pop,gen,temp,winnernum,winnergenes,winnernodes)) {
-	  //	if (xor_epoch(pop,gen,fnamebuf->str(),winnernum,winnergenes,winnernodes)) {
-	  //Collect Stats on end of experiment
-	  evals[expcount]=NEAT::pop_size*(gen-1)+winnernum;
-	  genes[expcount]=winnergenes;
-	  nodes[expcount]=winnernodes;
-	  gen=gens;
-
-	}
+		//Check for success
+		if (xor_epoch(pop,gen,temp,winnernum,winnergenes,winnernodes)) {
+		  //	if (xor_epoch(pop,gen,fnamebuf->str(),winnernum,winnergenes,winnernodes)) {
+		  //Collect Stats on end of experiment
+		  evals[expcount]=NEAT::pop_size*(gen-1)+winnernum;
+		  genes[expcount]=winnergenes;
+		  nodes[expcount]=winnernodes;
+		  gen=gens;
 	
-	//Clear output filename
-	fnamebuf->clear();
-	delete fnamebuf;
+		}
+
+		//Clear output filename
+		fnamebuf->clear();
+		delete fnamebuf;
 	
       }
 
@@ -150,10 +150,15 @@ bool xor_evaluate(Organism *org) {
 
   //The four possible input combinations to xor
   //The first number is for biasing
-  double in[4][3]={{1.0,0.0,0.0},
-		   {1.0,0.0,1.0},
-		   {1.0,1.0,0.0},
-		   {1.0,1.0,1.0}};
+  double in[8][4]={
+		   {1.0, 0.0, 0.0, 0.0},
+		   {1.0, 0.0, 0.0, 1.0},
+		   {1.0, 0.0, 1.0 ,0.0},
+		   {1.0, 0.0, 1.0, 1.0},
+		   {1.0, 1.0, 0.0, 0.0},
+		   {1.0, 1.0, 0.0, 1.0},
+		   {1.0, 1.0, 1.0, 0.0},
+		   {1.0, 1.0, 1.0, 1.0}};
   
   net=org->net;
   numnodes=((org->gnome)->nodes).size();
