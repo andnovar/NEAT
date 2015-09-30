@@ -170,7 +170,7 @@ bool xor_evaluate(Organism *org) {
   //cout<<"DEPTH: "<<net_depth<<endl;
 
   //Load and activate the network on each input
-  for(count=0;count<=3;count++) {
+  for(count=0;count<=7;count++) {
     net->load_sensors(in[count]);
 
     //Relax net and get output
@@ -190,7 +190,7 @@ bool xor_evaluate(Organism *org) {
   
   if (success) {
     errorsum=(fabs(out[0])+fabs(1.0-out[1])+fabs(1.0-out[2])+fabs(out[3])+fabs(1.0-out[4])+fabs(out[5])+fabs(out[6])+fabs(1.0-out[7]));
-	org->fitness=pow((8.0-errorsum),3);
+	org->fitness=pow((8.0-errorsum), 2);
     org->error=errorsum;
   }
   else {
@@ -235,11 +235,11 @@ int xor_epoch(Population *pop,int generation,char *filename,int &winnernum,int &
       winnernum=(*curorg)->gnome->genome_id;
       winnergenes=(*curorg)->gnome->extrons();
       winnernodes=((*curorg)->gnome->nodes).size();
-      if (winnernodes==5) {
+//      if (winnernodes==5) {
 	//You could dump out optimal genomes here if desired
 	//(*curorg)->gnome->print_to_filename("xor_optimal");
 	//cout<<"DUMPED OPTIMAL"<<endl;
-      }
+//      }
     }
   }
   
