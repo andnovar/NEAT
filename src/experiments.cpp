@@ -33,24 +33,36 @@ Population *xor_test(int gens) {
     int nodes[NEAT::num_runs];
     double max_fitness_x_run[NEAT::num_runs];
     double max_fitness[gens];
+    int num_species_x_run[NEAT::num_runs];
+    int num_species[gens];
+    int num_genes_x_run[NEAT::num_runs];
+    int num_genes[gens];
     int winner_generation=0;
     int winnernum;
     int winnergenes;
     int winnernodes;
+    int num_species_x_gen;
     double max_fitness_x_gen;
+    int num_genes_x_gen;
     //For averaging
     int totalevals=0;
     int totalgenes=0;
     int totalnodes=0;
     double total_max_fitness=0;
+    int total_number_species=0;
+    int total_number_genes=0;
     int expcount;
     int samples;  //For averaging
 
     memset (evals, 0, NEAT::num_runs * sizeof(int));
     memset (genes, 0, NEAT::num_runs * sizeof(int));
     memset (nodes, 0, NEAT::num_runs * sizeof(int));
-    memset (max_fitness_x_run, 0, NEAT::num_runs * sizeof(int));
+    memset (max_fitness_x_run, 0, NEAT::num_runs * sizeof(double));
+    memset (num_species_x_run, 0, NEAT::num_runs * sizeof(int));
+    memset (num_genes_x_run, 0, NEAT::num_runs * sizeof(int));
     memset (max_fitness, 0, gens * sizeof(double));
+    memset (num_species, 0, gens * sizeof(int));
+    memset (num_genes, 0, gens * sizeof(int));
 
     ifstream iFile("xorstartgenes",ios::in);
 
@@ -72,7 +84,7 @@ Population *xor_test(int gens) {
       
       cout<<"Verifying Spawned Pop"<<endl;
       pop->verify();
-      
+
       for (gen=1;gen<=gens;gen++) {
 		cout<<"Epoch "<<gen<<endl;
 
@@ -86,10 +98,13 @@ Population *xor_test(int gens) {
 	
 		char temp[50];
 		sprintf (temp, "gen_%d", gen);
-	
+
 		//Check for success
-		bool success = xor_epoch(pop,gen,temp,winnernum,winnergenes,winnernodes, max_fitness_x_gen);
+		num_species_x_gen = 0;
+		bool success = xor_epoch(pop,gen,temp,winnernum,winnergenes,winnernodes, max_fitness_x_gen, num_species_x_gen, num_genes_x_gen);
 		max_fitness[gen-1]=max_fitness_x_gen;
+		num_species[gen-1]=num_species_x_gen;
+		num_genes[gen-1]=num_genes_x_gen;
 		if (success) {
 		  //	if (xor_epoch(pop,gen,fnamebuf->str(),winnernum,winnergenes,winnernodes)) {
 		  //Collect Stats on end of experiment
@@ -108,14 +123,32 @@ Population *xor_test(int gens) {
 
       int gencount;
       total_max_fitness = 0;
+      total_number_species = 0;
+      total_number_genes = 0;
+
       if(winner_generation != 0){
-		  cout<<"Average max fitness over generations: " <<endl;
+
+    	  cout<<"Average max fitness over generations: " <<endl;
 		  for(gencount=0; gencount<winner_generation; gencount++){
 			total_max_fitness += max_fitness[gencount];
 			cout<<"Max fitness of generation "<< (gencount+1) << ": " << max_fitness[gencount]<<endl;
 		  }
+		  cout<<"Average number of species over generations: " <<endl;
+		  for(gencount=0; gencount<winner_generation; gencount++){
+			total_number_species += num_species[gencount];
+		    cout<<"Number of species in generation "<< (gencount+1) << ": " << num_species[gencount]<<endl;
+		  }
+		  cout<<"Average number of genes for best individuals over generations: " <<endl;
+		  for(gencount=0; gencount<winner_generation; gencount++){
+			  total_number_genes += num_genes[gencount];
+			cout<<"Number of genes in generation for best individual"<< (gencount+1) << ": " << num_genes[gencount]<<endl;
+		  }
 		  max_fitness_x_run[expcount] = (double)total_max_fitness/winner_generation;
 		  cout<<"Average Max Fitness over generations: "<< max_fitness_x_run[expcount] <<endl;
+		  num_species_x_run[expcount] = (double)total_number_species/winner_generation;
+		  cout<<"Average number of species over generations: "<<num_species_x_run[expcount]<<endl;
+		  num_genes_x_run[expcount] = (double)total_number_genes/winner_generation;
+		  cout<<"Average number of genes over generations for best individual: "<<num_genes_x_run[expcount]<<endl;
       }
 
 	  if (expcount<NEAT::num_runs-1) delete pop;
@@ -148,7 +181,10 @@ Population *xor_test(int gens) {
 
     for(expcount=0;expcount<NEAT::num_runs;expcount++) {
     	cout<<"Average Max Fitness over generations for: run "<<expcount<<" => "<< max_fitness_x_run[expcount] <<endl;
+    	cout<<"Average number of species over generations for: run "<<expcount<<" => "<<num_species_x_run[expcount]<<endl;
+    	cout<<"Average number of genes over generations for best individual: run "<<expcount<<" => "<<num_genes_x_run[expcount]<<endl;
     }
+
     cout<<"Failures: "<<(NEAT::num_runs-samples)<<" out of "<<NEAT::num_runs<<" runs"<<endl;
     cout<<"Average Nodes: "<<(samples>0 ? (double)totalnodes/samples : 0)<<endl;
     cout<<"Average Genes: "<<(samples>0 ? (double)totalgenes/samples : 0)<<endl;
@@ -236,7 +272,7 @@ bool xor_evaluate(Organism *org) {
 
 }
 
-int xor_epoch(Population *pop,int generation,char *filename,int &winnernum,int &winnergenes,int &winnernodes, double &max_fit_winner) {
+int xor_epoch(Population *pop,int generation,char *filename,int &winnernum,int &winnergenes,int &winnernodes, double &max_fit_winner, int &num_species, int &num_genes) {
   vector<Organism*>::iterator curorg;
   vector<Species*>::iterator curspecies;
   //char cfilename[100];
@@ -246,9 +282,9 @@ int xor_epoch(Population *pop,int generation,char *filename,int &winnernum,int &
 
   bool win=false;
 
-
   //Evaluate each organism on a test
   for(curorg=(pop->organisms).begin();curorg!=(pop->organisms).end();++curorg) {
+
     if (xor_evaluate(*curorg)) {
       win=true;
       winnernum=(*curorg)->gnome->genome_id;
@@ -263,6 +299,8 @@ int xor_epoch(Population *pop,int generation,char *filename,int &winnernum,int &
   }
   
   double max_fit=0.0;
+  num_species = 0;
+  Organism *champion_of_all_species;
   //Average and max their fitnesses for dumping to file and snapshot
   for(curspecies=(pop->species).begin();curspecies!=(pop->species).end();++curspecies) {
 
@@ -271,12 +309,25 @@ int xor_epoch(Population *pop,int generation,char *filename,int &winnernum,int &
     //because this allows flexibility in terms of what time
     //to observe fitnesses at
 
-    (*curspecies)->compute_average_fitness();
-    double fitness = (*curspecies)->compute_max_fitness();
-    if(fitness > max_fit){
-    	max_fit = fitness;
-    }
+	(*curspecies)->compute_average_fitness();
+	double fitness = (*curspecies)->compute_max_fitness(); // calculate max fitness of the specie
+
+	// Check if there is a specie with higher fitness than the current if so set max to that value.
+	if(fitness > max_fit){
+		max_fit = fitness;
+		champion_of_all_species = (*curspecies)->get_champ();
+	}
+
+    num_species++; // increment the counter for species.
 	cout<< "Max fitness for specie "<< (*curspecies)->id << "--> " << fitness <<endl;
+	cout<< "Fitness Champion: "<< (*curspecies)->get_champ()->fitness << " Num genes champion --> " << (*curspecies)->get_champ()->gnome->extrons() <<endl;
+  }
+
+  if(num_species > 0){
+	  double fitness_champion = champion_of_all_species->fitness; // calculate champion of the specie fitness
+	  // get nuumber of genes of the champion in these specie
+	  num_genes = champion_of_all_species->gnome->extrons();
+	  cout<< "Total Fitness Champion: "<< fitness_champion << " Num genes champion --> " << num_genes <<endl;
   }
   // Defining max_fitness of this generation from the max fitness of the specie.
   max_fit_winner = max_fit;
@@ -295,12 +346,12 @@ int xor_epoch(Population *pop,int generation,char *filename,int &winnernum,int &
 
   if (win) {
     for(curorg=(pop->organisms).begin();curorg!=(pop->organisms).end();++curorg) {
-      if ((*curorg)->winner) {
-	cout<<"WINNER IS #"<<((*curorg)->gnome)->genome_id<<endl;
-	//Prints the winner to file
-	//IMPORTANT: This causes generational file output!
-	print_Genome_tofile((*curorg)->gnome,"xor_winner");
-      }
+		if ((*curorg)->winner) {
+			cout<<"WINNER IS #"<<((*curorg)->gnome)->genome_id<<endl;
+			//Prints the winner to file
+			//IMPORTANT: This causes generational file output!
+			print_Genome_tofile((*curorg)->gnome,"xor_winner");
+		}
     }
     
   }
