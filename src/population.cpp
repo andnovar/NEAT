@@ -77,9 +77,9 @@ Population::Population(std::vector<Genome*> genomeList, float power) {
 	{
 
 		new_genome=(*iter); 
-		if(power>0)
-			new_genome->mutate_link_weights(power,1.0,GAUSSIAN);
-		//new_genome->mutate_link_weights(1.0,1.0,COLDGAUSSIAN);
+//		if(power>0)
+//			new_genome->mutate_link_weights(power,1.0,GAUSSIAN);
+		new_genome->mutate_link_weights(1.0,1.0,COLDGAUSSIAN);
 		new_genome->randomize_traits();
 		new_organism=new Organism(0.0,new_genome,1);
 		organisms.push_back(new_organism);
@@ -446,7 +446,7 @@ bool Population::epoch(int generation) {
 	bool best_ok;
 
 	//We can try to keep the number of species constant at this number
-	int num_species_target=4;
+	int num_species_target=10;
 	int num_species=species.size();
 	double compat_mod=0.3;  //Modify compat thresh to control speciation
 
@@ -456,17 +456,17 @@ bool Population::epoch(int generation) {
 	// num_species species at all times, enforcing diversity
 	//This tinkers with the compatibility threshold, which
 	// normally would be held constant
-	/*
-	if (generation>1) {
-		if (num_species<num_species_target)
-			NEAT::compat_threshold-=compat_mod;
-		else if (num_species>num_species_target)
-			NEAT::compat_threshold+=compat_mod;
 
-		if (NEAT::compat_threshold<0.3) NEAT::compat_threshold=0.3;
+//	if (generation>1) {
+//		if (num_species<num_species_target)
+//			NEAT::compat_threshold-=compat_mod;
+//		else if (num_species>num_species_target)
+//			NEAT::compat_threshold+=compat_mod;
+//
+//		if (NEAT::compat_threshold<0.3) NEAT::compat_threshold=0.3;
+//
+//	}
 
-	}
-	*/
 
 
 	//Stick the Species pointers into a new Species list for sorting

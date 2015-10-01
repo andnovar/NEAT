@@ -96,7 +96,7 @@ int main(int argc, char *argv[]) {
   cout<<"3 - 2-pole balancing, no velocity info provided (non-markov)"<<endl;
   cout<<"4 - XOR"<<endl;
   cout<<"Number: ";
-  p=xor_test(100);
+  p=xor_test(150);
 
 //  cin>>choice;
 //
