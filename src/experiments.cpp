@@ -196,7 +196,7 @@ Population *xor_test(int gens) {
 
 bool xor_evaluate(Organism *org) {
   Network *net;
-  double out[4]; //The four outputs
+  double out[8]; //The eight outputs
   double this_out; //The current output
   int count;
   double errorsum;
@@ -210,10 +210,15 @@ bool xor_evaluate(Organism *org) {
 
   //The four possible input combinations to xor
   //The first number is for biasing
-  double in[4][3]={{1.0,0.0,0.0},
-		   {1.0,0.0,1.0},
-		   {1.0,1.0,0.0},
-		   {1.0,1.0,1.0}};
+  double in[8][4]={
+		   {1.0, 0.0, 0.0, 0.0},
+		   {1.0, 0.0, 0.0, 1.0},
+		   {1.0, 0.0, 1.0, 0.0},
+		   {1.0, 0.0, 1.0, 1.0},
+		   {1.0, 1.0, 0.0, 0.0},
+		   {1.0, 1.0, 0.0, 1.0},
+		   {1.0, 1.0, 1.0, 0.0},
+		   {1.0, 1.0, 1.0, 1.0}};
   
   net=org->net;
   numnodes=((org->gnome)->nodes).size();
@@ -225,7 +230,7 @@ bool xor_evaluate(Organism *org) {
   //cout<<"DEPTH: "<<net_depth<<endl;
 
   //Load and activate the network on each input
-  for(count=0;count<=3;count++) {
+  for(count=0;count<=7;count++) {
     net->load_sensors(in[count]);
 
     //Relax net and get output
@@ -244,8 +249,8 @@ bool xor_evaluate(Organism *org) {
   }
   
   if (success) {
-    errorsum=(fabs(out[0])+fabs(1.0-out[1])+fabs(1.0-out[2])+fabs(out[3]));
-    org->fitness=pow((4.0-errorsum),2);
+    errorsum=(fabs(out[0])+fabs(1.0-out[1])+fabs(1.0-out[2])+fabs(out[3])+fabs(1.0-out[4])+fabs(out[5])+fabs(out[6])+fabs(1.0-out[7]));
+    org->fitness=pow((8.0-errorsum),2);
     org->error=errorsum;
   }
   else {
@@ -255,13 +260,13 @@ bool xor_evaluate(Organism *org) {
   }
 
   #ifndef NO_SCREEN_OUT
-  cout<<"Org "<<(org->gnome)->genome_id<<"                                     error: "<<errorsum<<"  ["<<out[0]<<" "<<out[1]<<" "<<out[2]<<" "<<out[3]<<"]"<<endl;
+  cout<<"Org "<<(org->gnome)->genome_id<<"                                     error: "<<errorsum<<"  ["<<out[0]<<" "<<out[1]<<" "<<out[2]<<" "<<out[3]<<" "<<out[4]<<" "<<out[5]<<" "<<out[6]<<" "<<out[7]<<"]"<<endl;
   cout<<"Org "<<(org->gnome)->genome_id<<"                                     fitness: "<<org->fitness<<endl;
   #endif
 
   //  if (errorsum<0.05) { 
   //if (errorsum<0.2) {
-  if ((out[0]<0.5)&&(out[1]>=0.5)&&(out[2]>=0.5)&&(out[3]<0.5)) {
+  if ((out[0]<0.5)&&(out[1]>=0.5)&&(out[2]>=0.5)&&(out[3]<0.5)&&(out[4]>=0.5)&&(out[5]<0.5)&&(out[6]<0.5)&&(out[7]>=0.5)) {
     org->winner=true;
     return true;
   }
@@ -290,11 +295,11 @@ int xor_epoch(Population *pop,int generation,char *filename,int &winnernum,int &
       winnernum=(*curorg)->gnome->genome_id;
       winnergenes=(*curorg)->gnome->extrons();
       winnernodes=((*curorg)->gnome->nodes).size();
-      if (winnernodes==5) {
+      //if (winnernodes==5) {
 	//You could dump out optimal genomes here if desired
 	//(*curorg)->gnome->print_to_filename("xor_optimal");
 	//cout<<"DUMPED OPTIMAL"<<endl;
-      }
+      //}
     }
   }
   
