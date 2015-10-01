@@ -178,8 +178,9 @@ Population *xor_test(int gens) {
 		samples++;
       }
     }
-
+    char *model_file_name = "run_";
     for(expcount=0;expcount<NEAT::num_runs;expcount++) {
+
     	cout<<"Average Max Fitness over generations for: run "<<expcount<<" => "<< max_fitness_x_run[expcount] <<endl;
     	cout<<"Average number of species over generations for: run "<<expcount<<" => "<<num_species_x_run[expcount]<<endl;
     	cout<<"Average number of genes over generations for best individual: run "<<expcount<<" => "<<num_genes_x_run[expcount]<<endl;
@@ -290,11 +291,11 @@ int xor_epoch(Population *pop,int generation,char *filename,int &winnernum,int &
       winnernum=(*curorg)->gnome->genome_id;
       winnergenes=(*curorg)->gnome->extrons();
       winnernodes=((*curorg)->gnome->nodes).size();
-      if (winnernodes==5) {
+      //if (winnernodes==5) {
 	//You could dump out optimal genomes here if desired
 	//(*curorg)->gnome->print_to_filename("xor_optimal");
 	//cout<<"DUMPED OPTIMAL"<<endl;
-      }
+      //}
     }
   }
   
